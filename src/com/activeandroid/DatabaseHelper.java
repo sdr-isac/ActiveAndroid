@@ -29,6 +29,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.text.TextUtils;
 
@@ -180,6 +181,13 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 
 							Log.i(file + " executed succesfully.");
 						}
+					}
+					catch (SQLiteException e) {
+						// Ignore exceptions about 'duplicate column name'. Hack to solve this issue: https://github.com/pardom/ActiveAndroid/issues/294
+						if (!e.getMessage().contains("duplicate column name")) {
+							throw e;
+						}
+						Log.v(String.format("executeMigrations: 'duplicate column name' ignored.", oldVersion, newVersion));
 					}
 					catch (NumberFormatException e) {
 						Log.w("Skipping invalidly named file: " + file, e);
